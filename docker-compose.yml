@@ -1,0 +1,9 @@
+services:
+  ms-auditoria:
+    build: .
+    image: pedidos360/ms-auditoria
+    container_name: ms-auditoria
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    env_file: .env      # copia .env.example a .env y completa los valores
