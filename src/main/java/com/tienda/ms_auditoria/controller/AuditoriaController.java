@@ -1,14 +1,13 @@
 package com.tienda.ms_auditoria.controller;
 
 import com.tienda.ms_auditoria.model.EventoAuditoria;
-import com.tienda.ms_auditoria.repository.EventoAuditoriaRepository;
 import com.tienda.ms_auditoria.security.Seguridad;
+import com.tienda.ms_auditoria.service.AuditoriaService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,23 +20,19 @@ import java.util.Map;
 @PreAuthorize(Seguridad.ADMIN)
 public class AuditoriaController {
 
-    private final EventoAuditoriaRepository repo;
+    private final AuditoriaService service;
 
-    public AuditoriaController(EventoAuditoriaRepository repo) {
-        this.repo = repo;
+    public AuditoriaController(AuditoriaService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<EventoAuditoria> ultimos() {
-        return repo.findTop100ByOrderByFechaDesc();
+        return service.ultimos();
     }
 
     @GetMapping("/resumen")
     public Map<String, Long> resumen() {
-        Map<String, Long> resultado = new LinkedHashMap<>();
-        for (Object[] fila : repo.contarPorEvento()) {
-            resultado.put((String) fila[0], (Long) fila[1]);
-        }
-        return resultado;
+        return service.resumen();
     }
 }
