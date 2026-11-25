@@ -10,6 +10,8 @@ public interface EventoAuditoriaRepository extends JpaRepository<EventoAuditoria
 
     List<EventoAuditoria> findTop100ByOrderByFechaDesc();
 
+    boolean existsByEventoId(String eventoId);
+
     @Query("select e.routingKey, count(e) from EventoAuditoria e group by e.routingKey")
     List<Object[]> contarPorEvento();
 }

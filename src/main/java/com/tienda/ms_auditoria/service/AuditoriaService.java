@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Logica de negocio de auditoria (sin detalles de RabbitMQ). */
+/** Logica de negocio de auditoria (no conoce Kafka: recibe clave, payload y origen ya extraidos). */
 @Service
 public class AuditoriaService {
 
@@ -26,8 +26,18 @@ public class AuditoriaService {
 
     @Transactional
     public EventoAuditoria registrar(String routingKey, String payload) {
-        EventoAuditoria evento = repo.save(new EventoAuditoria(routingKey, payload, Instant.now()));
-        log.info("[AUDITORIA] {} registrado", routingKey);
+        return registrar(routingKey, payload, null, null);
+    }
+
+    /** Registra el evento una sola vez: si el eventoId ya existe (reentrega de Kafka) no lo duplica. */
+    @Transactional
+    public EventoAuditoria registrar(String clave, String payload, String eventoId, String origen) {
+        if (eventoId != null && repo.existsByEventoId(eventoId)) {
+            log.info("[AUDITORIA] {} ({}) ya registrado: reentrega ignorada", clave, eventoId);
+            return null;
+        }
+        EventoAuditoria evento = repo.save(new EventoAuditoria(clave, payload, Instant.now(), eventoId, origen));
+        log.info("[AUDITORIA] {} registrado desde {}", clave, origen);
         return evento;
     }
 
